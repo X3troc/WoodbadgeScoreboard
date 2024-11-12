@@ -22,7 +22,9 @@ public class PlayerMarker : MonoBehaviour
     private Coroutine moveCoroutine;
     [SerializeField] ParticleSystem fxStartMove; // Reference to the particle system
     [SerializeField] ParticleSystem fxLeader; // Reference to the particle system
-
+    [SerializeField] ParticleSystem fxLeader2; // Reference to the particle system
+    [SerializeField] ParticleSystem fxLeader3; // Reference to the particle system
+    
     void Start()
     {
         targetPosition = transform.position;
@@ -135,6 +137,8 @@ public class PlayerMarker : MonoBehaviour
             {
                 rotationCoroutine = StartCoroutine(RotateWhileWinning());
                 fxLeader.Play(); // Play the particle system
+                fxLeader2.Play(); // Play the particle system
+                fxLeader3.Play(); // Play the particle system
             }
         }
     }
@@ -156,6 +160,10 @@ public class PlayerMarker : MonoBehaviour
             {
                 rotationCoroutine = null;
                 fxLeader.Stop(); // Stop the particle system
+                fxLeader2.Stop(); // Stop the particle system
+                fxLeader3.Stop(); // Stop the particle system
+                //set the rotation back to 0
+                transform.rotation = Quaternion.identity;
                 break;
             }
         }

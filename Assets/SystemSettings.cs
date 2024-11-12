@@ -12,10 +12,13 @@ public class SystemSettings : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // Exit the game when the ESC key is hit
-        if (Input.GetKeyDown(KeyCode.Escape))
+        // Exit the game when the Shift + ESC key combination is hit
+        if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
         {
-            Application.Quit();
+            if (Input.GetKeyDown(KeyCode.Escape))
+            {
+                Application.Quit();
+            }
         }
     }
 }
