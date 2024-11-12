@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,42 +12,49 @@ public class ImageFader : MonoBehaviour
     public float lowerViewPercentage = 0.1f; // Percentage of the lower part of the view to check
 
     private Camera mainCamera;
-    private CanvasGroup[] imageCanvasGroups;
+    private Dictionary<GameObject, CanvasGroup> objectImageMap;
+    private Dictionary<CanvasGroup, Coroutine> fadeCoroutines;
 
     void Start()
     {
         mainCamera = Camera.main;
-        imageCanvasGroups = new CanvasGroup[imagesToFade.Length];
+        objectImageMap = new Dictionary<GameObject, CanvasGroup>();
+        fadeCoroutines = new Dictionary<CanvasGroup, Coroutine>();
 
-        for (int i = 0; i < imagesToFade.Length; i++)
+        for (int i = 0; i < objectsToCheck.Length; i++)
         {
-            imageCanvasGroups[i] = imagesToFade[i].gameObject.AddComponent<CanvasGroup>();
+            if (i < imagesToFade.Length)
+            {
+                CanvasGroup canvasGroup = imagesToFade[i].gameObject.AddComponent<CanvasGroup>();
+                objectImageMap.Add(objectsToCheck[i], canvasGroup);
+                fadeCoroutines.Add(canvasGroup, null);
+            }
         }
     }
 
     void Update()
     {
-        bool shouldFade = false;
-
-        foreach (GameObject obj in objectsToCheck)
+        foreach (var entry in objectImageMap)
         {
+            GameObject obj = entry.Key;
+            CanvasGroup canvasGroup = entry.Value;
+
             Vector3 viewPos = mainCamera.WorldToViewportPoint(obj.transform.position);
             if (viewPos.y < lowerViewPercentage)
             {
-                shouldFade = true;
-                break;
-            }
-        }
-
-        for (int i = 0; i < imagesToFade.Length; i++)
-        {
-            if (shouldFade)
-            {
-                StartCoroutine(FadeOut(imageCanvasGroups[i]));
+                if (fadeCoroutines[canvasGroup] != null)
+                {
+                    StopCoroutine(fadeCoroutines[canvasGroup]);
+                }
+                fadeCoroutines[canvasGroup] = StartCoroutine(FadeOut(canvasGroup));
             }
             else
             {
-                StartCoroutine(FadeIn(imageCanvasGroups[i]));
+                if (fadeCoroutines[canvasGroup] != null)
+                {
+                    StopCoroutine(fadeCoroutines[canvasGroup]);
+                }
+                fadeCoroutines[canvasGroup] = StartCoroutine(FadeIn(canvasGroup));
             }
         }
     }
@@ -54,9 +62,12 @@ public class ImageFader : MonoBehaviour
     private IEnumerator FadeOut(CanvasGroup canvasGroup)
     {
         float startAlpha = canvasGroup.alpha;
-        for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+        float elapsedTime = 0f;
+        while (elapsedTime < fadeDuration)
         {
-            canvasGroup.alpha = Mathf.Lerp(startAlpha, fadeAmount, t / fadeDuration);
+            elapsedTime += Time.deltaTime;
+            float normalizedTime = Mathf.Clamp01(elapsedTime / fadeDuration);
+            canvasGroup.alpha = Mathf.Lerp(startAlpha, fadeAmount, normalizedTime);
             yield return null;
         }
         canvasGroup.alpha = fadeAmount;
@@ -65,9 +76,12 @@ public class ImageFader : MonoBehaviour
     private IEnumerator FadeIn(CanvasGroup canvasGroup)
     {
         float startAlpha = canvasGroup.alpha;
-        for (float t = 0; t < fadeDuration; t += Time.deltaTime)
+        float elapsedTime = 0f;
+        while (elapsedTime < fadeDuration)
         {
-            canvasGroup.alpha = Mathf.Lerp(startAlpha, 1, t / fadeDuration);
+            elapsedTime += Time.deltaTime;
+            float normalizedTime = Mathf.Clamp01(elapsedTime / fadeDuration);
+            canvasGroup.alpha = Mathf.Lerp(startAlpha, 1, normalizedTime);
             yield return null;
         }
         canvasGroup.alpha = 1;
