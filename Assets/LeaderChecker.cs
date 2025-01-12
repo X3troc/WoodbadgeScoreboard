@@ -43,11 +43,11 @@ public class LeaderChecker : MonoBehaviour
         // Handle the leader (or lack thereof) as needed
         if (leader != null)
         {
-            Debug.Log("Leader: " + leader.name);
+          //  Debug.Log("Leader: " + leader.name);
         }
         else
         {
-            Debug.Log("No leader due to a tie.");
+            //Debug.Log("No leader due to a tie.");
         }
     }
 }

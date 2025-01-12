@@ -68,7 +68,8 @@ public class PlayerMarker : MonoBehaviour
             {
                 moveDistance = score;
                 float newTotalScore = totalScore + moveDistance;
-
+                //Clear the input field
+                scoreInputField.text = "";
                 if (newTotalScore > maxScore)
                 {
                     newTotalScore = maxScore;
@@ -92,6 +93,7 @@ public class PlayerMarker : MonoBehaviour
                     StopCoroutine(moveCoroutine);
                 }
                 moveCoroutine = StartCoroutine(MoveTimeout());
+                
             }
             else
             {
