@@ -1,8 +1,17 @@
 using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
 
 public class LeaderChecker : MonoBehaviour
 {
     public GameObject[] playerGameObjects; // Array to track player game objects
+    private Dictionary<GameObject, float> playerScores = new Dictionary<GameObject, float>(); // Dictionary to track scores
+
+    void Start()
+    {
+        StartCoroutine(LogScoresEveryMinute()); // Start the coroutine to log scores
+    }
 
     // Update is called once per frame
     void Update()
@@ -13,13 +22,16 @@ public class LeaderChecker : MonoBehaviour
 
         foreach (GameObject player in playerGameObjects)
         {
-            if (player.transform.position.y > highestY)
+            float playerY = player.transform.position.y;
+            playerScores[player] = playerY; // Update the score based on Y position
+
+            if (playerY > highestY)
             {
-                highestY = player.transform.position.y;
+                highestY = playerY;
                 leader = player;
                 isTie = false;
             }
-            else if (player.transform.position.y == highestY)
+            else if (playerY == highestY)
             {
                 isTie = true;
             }
@@ -29,7 +41,7 @@ public class LeaderChecker : MonoBehaviour
         {
             leader = null; // No leader if there's a tie
         }
-        
+
         // Handle the leader (or lack thereof) as needed
         foreach (GameObject player in playerGameObjects)
         {
@@ -39,15 +51,30 @@ public class LeaderChecker : MonoBehaviour
                 playerMarker.SetIsWinning(player == leader);
             }
         }
+    }
 
-        // Handle the leader (or lack thereof) as needed
-        if (leader != null)
+    private IEnumerator LogScoresEveryMinute()
+    {
+        while (true)
         {
-          //  Debug.Log("Leader: " + leader.name);
+            yield return new WaitForSeconds(60f); // Wait for 60 seconds
+            LogScores();
         }
-        else
+    }
+
+    private void LogScores()
+    {
+        string logFilePath = Path.Combine(Application.persistentDataPath, "scores.log");
+        using (StreamWriter writer = new StreamWriter(logFilePath, true))
         {
-            //Debug.Log("No leader due to a tie.");
+            writer.WriteLine("--------------------------------------------");
+            writer.WriteLine($"Time: {System.DateTime.Now}");
+            foreach (var playerScore in playerScores)
+            {
+                writer.WriteLine($"Player: {playerScore.Key.name}, Score: {playerScore.Value}");
+            }
+            writer.WriteLine();
         }
+        Debug.Log($"Logged scores to {logFilePath}");
     }
 }

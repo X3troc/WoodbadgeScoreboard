@@ -23,7 +23,7 @@ public class KeyboardController : MonoBehaviour
             {
                 inputField.text += c;
             }
-            else if (c == '\n' || c == '\r') // Enter key
+            else if (c == '\n' || c == '\r' || c == '\b') // Enter or Backspace key
             {
                 inputField.text = string.Empty;
             }
